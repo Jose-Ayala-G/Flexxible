@@ -1,0 +1,58 @@
+# Check Processor
+$processor = Get-WmiObject -Class Win32_Processor
+if ($processor.NumberOfCores -ge 2 -and $processor.MaxClockSpeed -ge 1000) {
+    Write-Output "Processor: Pass"
+} else {
+    Write-Output "Processor: Fail"
+}
+
+# Check RAM
+$ram = Get-WmiObject -Class Win32_ComputerSystem
+if ($ram.TotalPhysicalMemory -ge 4294967296) {
+    Write-Output "RAM: Pass"
+} else {
+    Write-Output "RAM: Fail"
+}
+
+# Check Storage
+$storage = Get-WmiObject -Class Win32_LogicalDisk -Filter "DriveType=3"
+$totalStorage = ($storage | Measure-Object -Property Size -Sum).Sum
+if ($totalStorage -ge 68719476736) {
+    Write-Output "Storage: Pass"
+} else {
+    Write-Output "Storage: Fail"
+}
+
+# Check UEFI and Secure Boot
+$firmware = Get-WmiObject -Namespace root\cimv2\security\microsofttpm -Class Win32_Tpm
+if ($firmware.IsActivated_InitialValue -eq $true -and $firmware.SpecVersion -ge '2.0') {
+    Write-Output "TPM: Pass"
+} else {
+    Write-Output "TPM: Fail"
+}
+
+# Check Graphics
+$graphics = Get-WmiObject -Class Win32_VideoController
+if ($graphics.DriverVersion -like "12*") {
+    Write-Output "Graphics: Pass"
+} else {
+    Write-Output "Graphics: Fail"
+}
+
+# Check Display
+$display = Get-WmiObject -Namespace root\wmi -Class WmiMonitorBasicDisplayParams
+if ($display.MaxHorizontalImageSize -ge 20 -and $display.MaxVerticalImageSize -ge 11) {
+    Write-Output "Display: Pass"
+} else {
+    Write-Output "Display: Fail"
+}
+
+# Check Internet connection and Microsoft account
+$internet = Test-Connection -ComputerName www.microsoft.com -Count 1
+if ($internet.StatusCode -eq 0) {
+    Write-Output "Internet Connection: Pass"
+} else {
+    Write-Output "Internet Connection: Fail"
+}
+
+# Note: Checking for Microsoft account is more complex and typically requires user interaction or additional scripts.
